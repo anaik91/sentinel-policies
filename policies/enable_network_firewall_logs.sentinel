@@ -1,0 +1,38 @@
+import "tfplan/v2" as tfplan
+
+allFirewallResources = filter tfplan.resource_changes as _, resource_changes {
+	resource_changes.type is "google_compute_firewall" and
+		resource_changes.mode is "managed" and
+		(resource_changes.change.actions contains "create" or
+			resource_changes.change.actions is ["update"])
+}
+
+print("Ensure Firewall logs is enabled for every Firewall Rule in VPC Network")
+
+deny_undefined_log_config = rule {
+	all allFirewallResources as _, firewall {
+		keys(firewall.change.after) contains "log_config"
+	}
+}
+
+firewall_log_config_metadata_is_enabled = rule when deny_undefined_log_config is true {
+	all allFirewallResources as _, firewall {
+		length(firewall.change.after.log_config) > 0
+	}
+}
+
+firewall_log_config_metadata_is_set = rule when firewall_log_config_metadata_is_enabled is true {
+	all allFirewallResources as _, firewall {
+		firewall.change.after.log_config[0].metadata in ["EXCLUDE_ALL_METADATA","INCLUDE_ALL_METADATA"]
+	}
+}
+
+if firewall_log_config_metadata_is_set is false {
+	print("google_compute_firewall.log_config[0] should be one of EXCLUDE_ALL_METADATA , INCLUDE_ALL_METADATA")
+}
+
+main = rule {
+	deny_undefined_log_config and
+	firewall_log_config_metadata_is_enabled and 
+    firewall_log_config_metadata_is_set
+}
