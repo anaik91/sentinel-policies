@@ -23,7 +23,7 @@ firewall_log_config_metadata_is_enabled = rule when deny_undefined_log_config is
 
 firewall_log_config_metadata_is_set = rule when firewall_log_config_metadata_is_enabled is true {
 	all allFirewallResources as _, firewall {
-		firewall.change.after.log_config[0].metadata in ["EXCLUDE_ALL_METADATA","INCLUDE_ALL_METADATA"]
+		firewall.change.after.log_config[0].metadata in ["EXCLUDE_ALL_METADATA", "INCLUDE_ALL_METADATA"]
 	}
 }
 
@@ -33,6 +33,6 @@ if firewall_log_config_metadata_is_set is false {
 
 main = rule {
 	deny_undefined_log_config and
-	firewall_log_config_metadata_is_enabled and 
-    firewall_log_config_metadata_is_set
+	firewall_log_config_metadata_is_enabled and
+	firewall_log_config_metadata_is_set
 }
