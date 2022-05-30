@@ -1,0 +1,36 @@
+import "tfplan/v2" as tfplan
+import "strings"
+
+default_compute_sa = "compute@developer.gserviceaccount.com"
+
+allNotebookResources = filter tfplan.resource_changes as _, resource_changes {
+	resource_changes.type is "google_notebooks_instance" and
+		resource_changes.mode is "managed" and
+		(resource_changes.change.actions contains "create" or
+			resource_changes.change.actions is ["update"])
+}
+
+print("Ensure Google Notbook Instance is created with Single User only mode")
+
+notebook_owners = rule {
+	all allNotebookResources as _, notebook {
+		length(notebook.change.after.instance_owners) is 1
+	}
+}
+
+messages = {}
+
+for allNotebookResources as rc, notebook {
+	if keys(notebook.change.after) contains "service_account" {
+		if ( strings.has_suffix(notebook.change.after.service_account , default_compute_sa) )  {
+			messages[rc] = notebook
+		}
+	}
+}
+
+deny_default_compute_sa = rule { length(messages) is 0 }
+
+main = rule {
+	notebook_owners and 
+	deny_default_compute_sa
+}
