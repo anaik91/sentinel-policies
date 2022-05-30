@@ -17,3 +17,8 @@ policy "enable_network_private_google_access" {
     source = "./enable_network_private_google_access.sentinel"
     enforcement_level = "soft-mandatory"
 }
+
+policy "enable_single_user_only_notebook" {
+    source = "./enable_single_user_only_notebook.sentinel"
+    enforcement_level = "soft-mandatory"
+}

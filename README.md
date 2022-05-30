@@ -23,6 +23,7 @@ compute_block_ssh_keys.sentinel  | Enforcing block-project-ssh-keys metadata in 
 enable_network_firewall_logs.sentinel  | Enforcing logging on all google_compute_firewall | 
 enable_network_flow_logs.sentinel  | Enforcing logging on google_compute_subnetwork across all VPCs | 
 enable_network_private_google_access.sentinel  | Enforcing private_ip_google_access  on google_compute_subnetwork across all VPCs | 
+enable_single_user_only_notebook | Enforcing Single User Admin for all google_notebooks_instance
 
 
 # Enforcement levels
@@ -65,6 +66,11 @@ policy "enable_network_flow_logs" {
 policy "enable_network_private_google_access" {
     source = "./enable_network_private_google_access.sentinel"
     enforcement_level = "advisory"
+}
+
+policy "enable_single_user_only_notebook" {
+    source = "./enable_single_user_only_notebook.sentinel"
+    enforcement_level = "soft-mandatory"
 }
 ```
 
